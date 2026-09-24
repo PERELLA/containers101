@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where containerd Sits</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin:0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height:1.5; padding: 28px 20px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.stack { display:flex; flex-direction:column; align-items:center; gap:0; margin-top: 10px; }
+.stack .node-btn { width:100%; max-width:660px; padding: 16px 20px; text-align:left; }
+.stack-arrow { color: var(--text-muted); font-size: 20px; margin: 2px 0; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Where containerd Sits</h1>
+  <p class="intro">containerd doesn't replace Kubernetes or the kernel — it's the runtime layer in between, and it's the one you'll see most often in managed cloud environments.</p>
+  
+<div class="stack">
+  <button class="node-btn" id="btn-k8s" onclick="selectNode('k8s')">
+    <div class="node-label">Kubernetes / CLI Tools</div>
+    <div class="node-hint">Where a request originates.</div>
+  </button>
+  <div class="stack-arrow">&#8595;</div>
+  <button class="node-btn" id="btn-cri" onclick="selectNode('cri')">
+    <div class="node-label">Container Runtime Interface (CRI)</div>
+    <div class="node-hint">The standard interface in between.</div>
+  </button>
+  <div class="stack-arrow">&#8595;</div>
+  <button class="node-btn" id="btn-containerd" onclick="selectNode('containerd')">
+    <div class="node-label">containerd</div>
+    <div class="node-hint">The default runtime in most managed clouds.</div>
+  </button>
+  <div class="stack-arrow">&#8595;</div>
+  <button class="node-btn" id="btn-kernel" onclick="selectNode('kernel')">
+    <div class="node-label">Host OS / Kernel</div>
+    <div class="node-hint">Where it actually executes.</div>
+  </button>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"k8s": {"title": "Kubernetes / CLI Tools", "text": "This is where a request to run a container actually originates \u2014 most often the kubelet, the agent running on every Kubernetes node, deciding a container needs to start or stop as part of a scheduling decision. It can also be a direct CLI tool interacting with the runtime outside of Kubernetes entirely. Either way, this layer doesn't know or care about the runtime's internal details \u2014 that's exactly what the layer below it is for."}, "cri": {"title": "Container Runtime Interface (CRI)", "text": "The CRI is a standardized gRPC API that Kubernetes uses to talk to whatever container runtime is installed, without needing runtime-specific code baked into Kubernetes itself. This is what lets an organization swap out containerd for CRI-O (or vice versa) without changing how Kubernetes operates day to day. Before this standard existed, Docker required a special compatibility layer (dockershim) to work with Kubernetes at all \u2014 which is part of why Kubernetes eventually dropped direct Docker support in favor of CRI-compliant runtimes."}, "containerd": {"title": "containerd", "text": "containerd was originally extracted from Docker's own internals as Docker modularized its architecture, and it's since become a CNCF graduated project maintained independently of Docker itself. It handles pulling and storing images, executing containers (via a lower-level component called runc), and managing their lifecycle \u2014 without the extra CLI, networking, and build tooling that ships with full Docker. Since Kubernetes 1.24 removed built-in Docker support, containerd has become the default runtime underneath managed node groups in EKS, AKS, and GKE."}, "kernel": {"title": "Host OS / Kernel", "text": "This is the same kernel layer covered in Module 3 \u2014 the single shared kernel providing namespaces and cgroups that make isolation possible. No matter which runtime sits above it, the actual execution and isolation mechanics ultimately depend on this layer. It's a useful reminder that Docker, containerd, and CRI-O aren't three fundamentally different technologies \u2014 they're three different orchestration and management layers built on the same underlying kernel primitives."}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>

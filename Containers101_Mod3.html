@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inside a Running Container</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin:0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height:1.5; padding: 28px 20px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.stack { display:flex; flex-direction:column; align-items:center; gap:0; margin-top: 10px; }
+.stack .node-btn { width:100%; max-width:660px; padding: 16px 20px; text-align:left; }
+.stack-arrow { color: var(--text-muted); font-size: 20px; margin: 2px 0; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Inside a Running Container</h1>
+  <p class="intro">Namespaces and control groups are the two kernel features doing the actual work of isolation — everything a runtime does builds on these.</p>
+  
+<div class="stack">
+  <button class="node-btn" id="btn-kernel" onclick="selectNode('kernel')">
+    <div class="node-label">Host Kernel</div>
+    <div class="node-hint">The single kernel every container on this host shares.</div>
+  </button>
+  <div class="stack-arrow">&#8595;</div>
+  <button class="node-btn" id="btn-ns" onclick="selectNode('ns')">
+    <div class="node-label">Namespaces</div>
+    <div class="node-hint">Isolate what a container can see.</div>
+  </button>
+  <div class="stack-arrow">&#8595;</div>
+  <button class="node-btn" id="btn-cgroups" onclick="selectNode('cgroups')">
+    <div class="node-label">Control Groups (cgroups)</div>
+    <div class="node-hint">Limit what a container can use.</div>
+  </button>
+  <div class="stack-arrow">&#8595;</div>
+  <button class="node-btn" id="btn-process" onclick="selectNode('process')">
+    <div class="node-label">Container Process</div>
+    <div class="node-hint">What's actually running.</div>
+  </button>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"kernel": {"title": "Host Kernel", "text": "Every container on a host shares that host's single kernel \u2014 there's no separate guest kernel the way a virtual machine gets one from a hypervisor. This is the core reason containers start faster and use fewer resources than VMs, and it's also the core reason a kernel-level vulnerability is a shared risk: if the kernel is compromised, that exposure isn't contained to one container \u2014 it potentially reaches every container running on that host."}, "ns": {"title": "Namespaces", "text": "Namespaces are the kernel feature that gives a container its own isolated view of the system \u2014 its own process list (so it can't see other containers' processes), its own network interfaces, its own filesystem mounts, and a few other isolated views. Critically, namespace isolation is a configuration choice, not an inherent guarantee: a container can be deliberately launched with a namespace shared with the host (for example, host networking or host PID mode), which removes that particular layer of isolation. That's a setting worth asking about directly rather than assuming is off."}, "cgroups": {"title": "Control Groups (cgroups)", "text": "Control groups, or cgroups, are the kernel feature that caps what a container is allowed to consume \u2014 CPU time, memory, and other resources. Without cgroup limits configured, a single misbehaving or compromised container can consume enough host resources to degrade or crash everything else running on that same host, sometimes called the noisy neighbor problem. On an engagement, an absence of resource limits is often a quieter finding than an access-control gap, but it's a real operational risk worth checking for."}, "process": {"title": "Container Process", "text": "Strip away the terminology and a running container is ultimately just a normal Linux process \u2014 the same kind of process you'd see in any process list \u2014 that happens to have a restricted view of the system (via namespaces) and a capped resource budget (via cgroups). There's no separate virtualized hardware boundary the way there is with a VM. That's the practical meaning behind containers sharing a kernel: the isolation is real, but it's implemented entirely through kernel features acting on an otherwise ordinary process, not through a hardware-level wall."}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>

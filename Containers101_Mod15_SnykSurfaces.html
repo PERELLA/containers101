@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One Platform, Two Surfaces</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin:0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height:1.5; padding: 28px 20px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.umbrella-wrap { display:flex; flex-direction:column; align-items:center; gap: 12px; margin-top: 10px; }
+.umbrella-wrap .node-btn.top { padding: 14px 26px; }
+.umbrella-arrows { color: var(--text-muted); font-size: 13px; }
+.umbrella-surfaces { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; max-width: 680px; }
+.umbrella-wrap .node-btn { padding: 16px; text-align:left; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>One Platform, Two Surfaces</h1>
+  <p class="intro">Snyk covers code and containers under one platform — but adopting it for one surface doesn't mean the other is actually turned on.</p>
+  
+<div class="umbrella-wrap">
+  <button class="node-btn top" id="btn-platform" onclick="selectNode('platform')">
+    <div class="node-label">Snyk Platform</div>
+  </button>
+  <div class="umbrella-arrows">&#8595; &#8595;</div>
+  <div class="umbrella-surfaces">
+    <button class="node-btn" id="btn-code" onclick="selectNode('code')">
+      <div class="node-label">Code &amp; Dependencies</div>
+      <div class="node-hint">Usually enabled first.</div>
+    </button>
+    <button class="node-btn" id="btn-containers" onclick="selectNode('containers')">
+      <div class="node-label">Container Images</div>
+      <div class="node-hint">Often left unconfirmed.</div>
+    </button>
+  </div>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"platform": {"title": "Snyk Platform", "text": "Snyk is a commercial security platform, sold in tiered licenses that generally scale by seat or usage. Its distinguishing model, compared to Trivy or Clair, is deep integration into the developer workflow itself \u2014 IDE plugins, pull-request checks, and repository scanning \u2014 rather than sitting purely in a CI pipeline or a registry. It covers several distinct products (application code, open-source dependencies, and containers) under one commercial umbrella, but each is a separate capability that has to be individually enabled and configured."}, "code": {"title": "Code & Dependencies", "text": "This is Snyk's original and most commonly adopted surface \u2014 scanning application source code and its declared open-source dependencies (npm, pip, Maven packages, and similar) for known vulnerabilities and license compliance issues. It typically shows results directly inside a developer's IDE and inside pull requests, which is a large part of Snyk's appeal to development teams: the feedback loop is fast and happens where developers already work."}, "containers": {"title": "Container Images", "text": "Snyk Container scans image layers for OS-level package vulnerabilities \u2014 conceptually similar territory to what Trivy or Clair do, just under Snyk's commercial platform and UI. The important thing to check on an engagement: this is a separate product from Snyk's code-scanning capability, requiring its own onboarding and configuration. A team can be a longtime, mature user of Snyk for code scanning and still have never turned on the container-scanning piece at all \u2014 adoption of one surface says nothing about the other."}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>

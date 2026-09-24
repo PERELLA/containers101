@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anatomy of a Public Pull</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin:0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height:1.5; padding: 28px 20px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.pull-flow { display:flex; align-items:center; gap: 10px; margin-top: 14px; flex-wrap: wrap; justify-content:center; }
+.pull-flow .node-btn { padding: 14px 16px; max-width: 190px; }
+.pull-flow .node-btn.gap { border-style: dashed; }
+.pull-arrow { color: var(--text-muted); font-size: 20px; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Anatomy of a Public Pull</h1>
+  <p class="intro">Nothing about Docker Hub verifies who published an image. The dashed step is where that gap should get caught — if it exists at all.</p>
+  
+<div class="pull-flow">
+  <button class="node-btn" id="btn-publisher" onclick="selectNode('publisher')">
+    <div class="node-label">Publisher</div>
+    <div class="node-hint">Identity unverified.</div>
+  </button>
+  <div class="pull-arrow">&#8594;</div>
+  <button class="node-btn" id="btn-hub" onclick="selectNode('hub')">
+    <div class="node-label">Docker Hub</div>
+    <div class="node-hint">Open pull, open publish.</div>
+  </button>
+  <div class="pull-arrow">&#8594;</div>
+  <button class="node-btn gap" id="btn-vetting" onclick="selectNode('vetting')">
+    <div class="node-label">Vetting / Mirroring</div>
+    <div class="node-hint">Often missing.</div>
+  </button>
+  <div class="pull-arrow">&#8594;</div>
+  <button class="node-btn" id="btn-build" onclick="selectNode('build')">
+    <div class="node-label">Your Build</div>
+    <div class="node-hint">Now part of the supply chain.</div>
+  </button>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"publisher": {"title": "Publisher", "text": "Anyone can create a Docker Hub account and push an image \u2014 there's no verification of who they are or what their intent is beyond having an account. A small subset of images carry a Docker Official Images or Verified Publisher designation, meaning Docker has reviewed and curated them, but the overwhelming majority of public images carry no such review. From an assessment standpoint, publisher identity on its own tells you very little \u2014 it's the absence of any check on that identity that's the actual risk."}, "hub": {"title": "Docker Hub", "text": "Docker Hub is the default public registry \u2014 the one a container engine reaches for automatically if no other registry is specified. It hosts both a small number of curated Official Images and a much larger volume of unverified, community-published images side by side. Repositories are open to pull by default unless a publisher explicitly marks one private, and there's no platform-level step that inspects an image's contents before it's made available for anyone to pull."}, "vetting": {"title": "Vetting / Mirroring", "text": "This is the step that's supposed to catch problems before a public image reaches a production build \u2014 typically an internal process that scans an image, confirms it comes from an approved or pinned publisher, and only then copies it into an internal mirror registry that builds are allowed to pull from. Done well, this creates a controlled boundary between the open public internet and what actually ends up in a client's environment. The dashed outline here is deliberate: this step is very commonly missing entirely, with organizations pulling directly from the public internet at build time instead."}, "build": {"title": "Your Build", "text": "Once an image \u2014 or even just one of its base layers \u2014 enters a build, every vulnerability, backdoor, or license issue it carries comes along with it, and now belongs to your software supply chain going forward. This is why the vetting step matters more than the registry choice itself: a well-vetted public image is a manageable risk, while an unvetted one from any source, public or otherwise, is an open question mark sitting inside production."}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>
