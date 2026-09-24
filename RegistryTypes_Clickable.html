@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registry Types at a Glance</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin:0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height:1.5; padding: 28px 20px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 8px; }
+@media (max-width: 780px) { .grid3 { grid-template-columns: 1fr; } }
+.grid3 .node-btn { padding: 20px; text-align:left; }
+.examples { font-size: 12.5px; color: var(--text-muted); font-family: var(--mono); margin-bottom: 10px; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Registry Types at a Glance</h1>
+  <p class="intro">Every image comes from somewhere — and where it comes from determines who is actually responsible for keeping it safe.</p>
+  
+<div class="grid3">
+  <button class="node-btn" id="btn-public" onclick="selectNode('public')">
+    <div class="node-label">Public</div>
+    <div class="examples">Docker Hub, public package registries</div>
+    <div class="node-hint">Open pull. No publisher verification.</div>
+  </button>
+  <button class="node-btn" id="btn-cloud" onclick="selectNode('cloud')">
+    <div class="node-label">Private Cloud-Hosted</div>
+    <div class="examples">ECR, ACR, Artifact Registry</div>
+    <div class="node-hint">Access rides on cloud IAM.</div>
+  </button>
+  <button class="node-btn" id="btn-self" onclick="selectNode('self')">
+    <div class="node-label">Self-Hosted</div>
+    <div class="examples">Harbor, Artifactory, custom-run instances</div>
+    <div class="node-hint">The org owns everything.</div>
+  </button>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"public": {"title": "Public", "text": "A public registry is controlled by its publisher community, not by your organization \u2014 anyone can create an account and publish an image, and nothing on the platform verifies who they are or what their intent is. Pull access is open by default. The risk here isn't the registry itself; it's the absence of any internal vetting or mirroring step before a public image reaches a production build. That gap, if it exists, is the actual finding."}, "cloud": {"title": "Private Cloud-Hosted", "text": "A private cloud-hosted registry \u2014 ECR, ACR, or Artifact Registry \u2014 puts the underlying infrastructure in the cloud provider's hands, but access control rides entirely on the organization's own cloud IAM configuration. A well-run registry sitting behind a badly scoped IAM policy is still a badly scoped IAM policy \u2014 the platform's security doesn't compensate for a misconfigured grant. Each of the three major providers has its own well-known misconfiguration pattern, covered individually in later lessons."}, "self": {"title": "Self-Hosted", "text": "A self-hosted registry \u2014 something like Harbor or Artifactory, run on infrastructure the organization controls \u2014 comes with no shared responsibility model to lean on. Every operational responsibility \u2014 patching, backups, access logging, ongoing monitoring \u2014 lands entirely on the organization, with no cloud provider quietly handling any of it in the background. This isn't inherently worse than a cloud-hosted option, but it does mean there's more for an assessor to verify rather than assume."}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>

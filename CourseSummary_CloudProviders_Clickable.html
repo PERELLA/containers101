@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud Registry Providers at a Glance</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin:0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height:1.5; padding: 28px 20px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 8px; }
+@media (max-width: 780px) { .grid3 { grid-template-columns: 1fr; } }
+.grid3 .node-btn { padding: 20px; text-align:left; }
+.examples { font-size: 12.5px; color: var(--text-muted); font-family: var(--mono); margin-bottom: 10px; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Cloud Registry Providers at a Glance</h1>
+  <p class="intro">Same underlying idea — a private, cloud-hosted registry — but each provider ties access to a different identity system, and each has its own well-known way of getting misconfigured.</p>
+  
+<div class="grid3">
+  <button class="node-btn" id="btn-ecr" onclick="selectNode('ecr')">
+    <div class="node-label">Amazon ECR</div>
+    <div class="examples">Elastic Container Registry</div>
+    <div class="node-hint">Repository policy or IAM — wildcard principals are the known risk.</div>
+  </button>
+  <button class="node-btn" id="btn-acr" onclick="selectNode('acr')">
+    <div class="node-label">Azure Container Registry</div>
+    <div class="examples">ACR</div>
+    <div class="node-hint">Entra ID RBAC — legacy admin account is the known risk.</div>
+  </button>
+  <button class="node-btn" id="btn-gar" onclick="selectNode('gar')">
+    <div class="node-label">Google Artifact Registry</div>
+    <div class="examples">successor to Container Registry (GCR)</div>
+    <div class="node-hint">Cloud IAM — inherited project roles are the known risk.</div>
+  </button>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"ecr": {"title": "Amazon ECR", "text": "ECR access is governed by AWS IAM \u2014 both repository policies and IAM policies can grant access, and either can go wrong. Private by default, cross-account sharing requires an explicit grant. The well-known risk pattern is a wildcard principal in a repository policy statement, opening pull access to any AWS account rather than the specific one that was intended. On an engagement, read the actual policy statements rather than assuming private-by-default still holds."}, "acr": {"title": "Azure Container Registry", "text": "ACR is designed around Entra ID RBAC, the intended path for every user and service needing access. It also ships alongside a legacy, shared-credential admin account that exists entirely outside Entra ID governance. The well-known risk pattern is that legacy account being left enabled, giving anyone holding the credential a path around identity governance entirely. Confirm it's explicitly disabled \u2014 its existence isn't the finding, its being enabled usually is."}, "gar": {"title": "Google Artifact Registry", "text": "Artifact Registry access runs through Google Cloud IAM, which can be bound at the project level or scoped specifically to the registry. The well-known risk pattern is access inherited from a broad project-level role (like Editor) rather than a dedicated registry-scoped binding \u2014 meaning access nobody deliberately intended to grant. Ask whether registry access uses a role built for Artifact Registry specifically, or just rides along with a broader project-level grant."}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>

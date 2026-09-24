@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Key Terms at a Glance</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin:0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height:1.5; padding: 28px 20px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.glossary-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 8px; }
+@media (max-width: 700px) { .glossary-grid { grid-template-columns: 1fr; } }
+.glossary-grid .node-btn { padding: 16px 18px; text-align:left; }
+.acronym-callout.node-btn { text-align:left; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Key Terms at a Glance</h1>
+  <p class="intro">The core vocabulary for this course — keep this nearby as you move through the rest of the modules.</p>
+  
+<div class="glossary-grid">
+  <button class="node-btn" id="btn-image" onclick="selectNode('image')"><div class="node-label">Image</div><div class="node-hint">The packaged template.</div></button>
+  <button class="node-btn" id="btn-container" onclick="selectNode('container')"><div class="node-label">Container</div><div class="node-hint">A running instance.</div></button>
+  <button class="node-btn" id="btn-registry" onclick="selectNode('registry')"><div class="node-label">Registry</div><div class="node-hint">Where images live.</div></button>
+  <button class="node-btn" id="btn-layer" onclick="selectNode('layer')"><div class="node-label">Layer</div><div class="node-hint">One piece of an image.</div></button>
+  <button class="node-btn" id="btn-base" onclick="selectNode('base')"><div class="node-label">Base Image</div><div class="node-hint">The starting layer.</div></button>
+  <button class="node-btn" id="btn-orch" onclick="selectNode('orch')"><div class="node-label">Orchestration</div><div class="node-hint">Managing many at scale.</div></button>
+  <button class="node-btn" id="btn-immut" onclick="selectNode('immut')"><div class="node-label">Immutability</div><div class="node-hint">Never modified in place.</div></button>
+  <button class="node-btn" id="btn-crio" onclick="selectNode('crio')"><div class="node-label">Acronym Watch: CRI-O</div><div class="node-hint">Covered in full later.</div></button>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"image": {"title": "Image", "text": "An image is the packaged, read-only template a container is built from. It bundles an application together with everything it needs to run \u2014 a runtime, system libraries, configuration \u2014 so it behaves the same way regardless of where it's deployed. Images are built once and then run many times, which is a large part of why containers made deployment more predictable than it used to be."}, "container": {"title": "Container", "text": "A container is a running instance of an image \u2014 the same relationship a running program has to the file it was launched from. Multiple containers can be started from the same image at the same time, each isolated from the others, which is exactly what makes scaling an application up or down as simple as starting or stopping more containers."}, "registry": {"title": "Registry", "text": "A registry is where images are stored and distributed from \u2014 a library that container engines pull images from before running them, and that build pipelines push newly built images to. Registries come in a few different flavors (public, private cloud-hosted, self-hosted), each with a different access control model, which later modules cover individually."}, "layer": {"title": "Layer", "text": "An image is built from a stack of layers, each one typically representing a single instruction in the build process \u2014 installing a package, copying in application code, setting a configuration value. Layers are cached and reused across images where possible, which is why rebuilding an image after a small code change is usually much faster than building it from scratch."}, "base": {"title": "Base Image", "text": "The base image is the starting layer everything else in an image builds on top of \u2014 often a minimal operating system or language runtime. The choice of base image has real security implications: a bloated or outdated base image carries forward every vulnerability it contains into every image built on top of it."}, "orch": {"title": "Orchestration", "text": "Orchestration is the practice of managing many containers at scale \u2014 deciding where they run, restarting them if they fail, scaling their numbers up or down with demand, and coordinating how they reach each other over a network. Kubernetes is the dominant orchestration platform in use today; it's covered in full in the companion Kubernetes Fundamentals course."}, "immut": {"title": "Immutability", "text": "Immutability means an image is never modified after it's built \u2014 any change requires building an entirely new image and deploying that instead. This is a meaningful security property: it means production configuration can't drift silently over time through ad hoc changes, since the only way to change what's running is through the same reviewed build process every other change goes through."}, "crio": {"title": "Acronym Watch: CRI-O", "text": "CRI-O stands for Container Runtime Interface, with the O standing for Open Container Initiative. It's a container runtime built specifically to implement Kubernetes's CRI standard, and nothing else \u2014 covered in full later in the course."}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>

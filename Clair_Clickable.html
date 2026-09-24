@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connected vs. Not</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin:0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height:1.5; padding: 28px 20px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.clair-wrap { display:flex; flex-direction:column; align-items:center; gap: 14px; margin-top: 10px; }
+.clair-wrap .node-btn.hub { border-radius: 50px; padding: 14px 30px; }
+.clair-registries { display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; max-width: 700px; }
+.clair-registries .node-btn { padding: 14px; text-align:center; }
+.clair-registries .node-btn.connected { border-color: var(--pass); }
+.clair-registries .node-btn.connected.active { background: rgba(76,175,125,0.15); }
+.clair-registries .node-btn.gap { border-color: var(--finding); border-style: dashed; }
+.clair-registries .node-btn.gap.active { background: rgba(224,98,90,0.15); }
+.registry-status.connected { color: var(--pass); font-size:12px; }
+.registry-status.gap { color: var(--finding); font-size:12px; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Connected vs. Not</h1>
+  <p class="intro">Clair doesn't auto-discover new registries. Every one has to be explicitly wired in — and a newly added registry is the easiest one to forget.</p>
+  
+<div class="clair-wrap">
+  <button class="node-btn hub" id="btn-clair" onclick="selectNode('clair')"><div class="node-label">Clair</div></button>
+  <div class="clair-registries">
+    <button class="node-btn connected" id="btn-a" onclick="selectNode('a')"><div class="node-label">Registry A</div><div class="registry-status connected">Connected — scanned</div></button>
+    <button class="node-btn connected" id="btn-b" onclick="selectNode('b')"><div class="node-label">Registry B</div><div class="registry-status connected">Connected — scanned</div></button>
+    <button class="node-btn gap" id="btn-c" onclick="selectNode('c')"><div class="node-label">Registry C (new)</div><div class="registry-status gap">Not connected — blind spot</div></button>
+  </div>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"clair": {"title": "Clair", "text": "Clair is an open-source, API-driven vulnerability scanner most commonly paired with a registry platform like Quay \u2014 it scans images as they land in a registry it's connected to, rather than as a step in a CI pipeline the way Trivy typically works. Its architecture means scanning happens automatically once set up, but that automation only covers the registries it's actually been told about."}, "a": {"title": "Registry A \u2014 Connected", "text": "This registry was connected to Clair when the scanning program was first set up, and every image landing in it is being checked against Clair's vulnerability database automatically. This is the state every registry in an environment should be in \u2014 the question worth asking is simply how the organization confirms this connection is still active and the database is current."}, "b": {"title": "Registry B \u2014 Connected", "text": "Same as Registry A \u2014 actively connected and scanned. Having more than one registry connected is normal in larger environments; the point of showing two connected registries here is to make Registry C's gap stand out by contrast, since coverage gaps are rarely total \u2014 they're usually one registry out of several."}, "c": {"title": "Registry C (new) \u2014 Not Connected", "text": "This is the coverage gap in practice: a registry added after Clair's initial setup, never wired into the scanning configuration, quietly sitting outside coverage while everyone assumes scanning covers everything. Clair does not auto-discover new registries \u2014 someone has to deliberately configure the connection, and if that step gets missed during a registry migration or a new environment stand-up, this is exactly what results. On an engagement, always ask for the full list of registries in use first, then check that list against what Clair is actually configured to scan \u2014 don't just confirm that scanning exists somewhere."}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>

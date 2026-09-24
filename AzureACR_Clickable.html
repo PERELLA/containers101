@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Two Paths In</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin:0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height:1.5; padding: 28px 20px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.branch-wrap { display:flex; flex-direction:column; align-items:center; gap: 10px; margin-top: 10px; }
+.branch-wrap .node-btn.cap { max-width: 420px; padding: 12px 18px; text-align:center; }
+.branch-arrow { color: var(--text-muted); font-size: 20px; }
+.branch-row { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; max-width: 700px; }
+.branch-row .node-btn { padding: 14px 16px; text-align:left; }
+.branch-row .node-btn.pass { border-color: var(--pass); background: rgba(76,175,125,0.08); }
+.branch-row .node-btn.pass.active { border-color: var(--pass); background: rgba(76,175,125,0.18); }
+.branch-row .node-btn.finding { border-color: var(--finding); background: rgba(224,98,90,0.08); }
+.branch-row .node-btn.finding.active { border-color: var(--finding); background: rgba(224,98,90,0.18); }
+.branch-label.pass { color: var(--pass); font-weight:700; font-size:14px; margin-bottom:4px; }
+.branch-label.finding { color: var(--finding); font-weight:700; font-size:14px; margin-bottom:4px; }
+.branch-desc { font-size: 13px; color: var(--text-muted); }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Two Paths In</h1>
+  <p class="intro">ACR is designed around Entra ID RBAC — but a legacy admin account ships alongside it, and it doesn't answer to Entra ID at all.</p>
+  
+<div class="branch-wrap">
+  <button class="node-btn cap" id="btn-users" onclick="selectNode('users')"><div class="node-label">Users &amp; Services Needing Access</div></button>
+  <div class="branch-arrow">&#8595;</div>
+  <div class="branch-row">
+    <button class="node-btn pass" id="btn-entra" onclick="selectNode('entra')"><div class="branch-label pass">Entra ID RBAC</div><div class="branch-desc">The intended path.</div></button>
+    <button class="node-btn finding" id="btn-legacy" onclick="selectNode('legacy')"><div class="branch-label finding">Legacy Admin Account</div><div class="branch-desc">Bypasses Entra ID entirely.</div></button>
+  </div>
+  <div class="branch-arrow">&#8595;</div>
+  <button class="node-btn cap" id="btn-acr" onclick="selectNode('acr')"><div class="node-label">Azure Container Registry</div></button>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"users": {"title": "Users & Services Needing Access", "text": "This is anyone or anything that legitimately needs to pull or push images \u2014 a CI/CD pipeline, a developer, a running Kubernetes cluster. How that access request actually gets authorized is where the real story is, since ACR offers two very different routes to the same destination."}, "entra": {"title": "Entra ID RBAC \u2014 Pass", "text": "Entra ID RBAC is the path ACR is designed around: access is granted through role assignments tied to the organization's identity provider, which means it's subject to the same governance, conditional access policies, and audit trail as everything else the organization controls through Entra ID. When access flows entirely through this path, revoking a departed employee's Entra ID account revokes their registry access too \u2014 there's no separate credential to remember to clean up."}, "legacy": {"title": "Legacy Admin Account \u2014 Finding", "text": "Every ACR instance ships with an option to enable a legacy admin account \u2014 a single shared username and password that authenticates directly against the registry, completely bypassing Entra ID. If it's left enabled, anyone holding that one credential has full registry access with no connection to the organization's identity governance: no per-user audit trail, no conditional access policy, and no automatic revocation when an employee leaves. Its mere existence isn't the finding \u2014 Microsoft ships it disabled by default in newer registries \u2014 but finding it enabled, especially without a documented reason, is."}, "acr": {"title": "Azure Container Registry", "text": "Whichever path was used to authenticate, this is the destination \u2014 the actual container images and their access logs. On an engagement, the practical question is which of the two paths above is actually active, and whether the legacy path is being used at all, actively or as an unused-but-enabled fallback."}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scanning Tools at a Glance</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin:0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height:1.5; padding: 28px 20px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 8px; }
+@media (max-width: 780px) { .grid3 { grid-template-columns: 1fr; } }
+.grid3 .node-btn { padding: 20px; text-align:left; }
+.examples { font-size: 12.5px; color: var(--text-muted); font-family: var(--mono); margin-bottom: 10px; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Scanning Tools at a Glance</h1>
+  <p class="intro">All three catch vulnerabilities — but where they sit in the workflow, and what they actually cover, is different enough to change what you'd ask about each one.</p>
+  
+<div class="grid3">
+  <button class="node-btn" id="btn-trivy" onclick="selectNode('trivy')">
+    <div class="node-label">Trivy</div>
+    <div class="examples">open source · Aqua Security</div>
+    <div class="node-hint">Broad scope, CI/CD-embedded.</div>
+  </button>
+  <button class="node-btn" id="btn-clair" onclick="selectNode('clair')">
+    <div class="node-label">Clair</div>
+    <div class="examples">open source · registry-integrated</div>
+    <div class="node-hint">Registry-native, per-registry connection.</div>
+  </button>
+  <button class="node-btn" id="btn-snyk" onclick="selectNode('snyk')">
+    <div class="node-label">Snyk</div>
+    <div class="examples">commercial · tiered licensing</div>
+    <div class="node-hint">Developer-workflow integrated.</div>
+  </button>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"trivy": {"title": "Trivy", "text": "Trivy is open source and typically embedded directly in a CI/CD pipeline, scanning container images, filesystems, and infrastructure-as-code templates, with SBOM generation for critical images. Its breadth of coverage is a real strength; the thing worth confirming on an engagement is whether findings actually block the build, or are only being logged \u2014 detection without enforcement is a common gap."}, "clair": {"title": "Clair", "text": "Clair is open source, API-driven, and commonly paired with a registry platform like Quay \u2014 it scans images as they land in a registry it's connected to, rather than as a pipeline step. It covers container images only, and it does not auto-discover new registries: each one has to be explicitly connected. Ask for the full list of registries in use, then confirm each one is actually wired in \u2014 a newly added registry is the easiest one to leave uncovered."}, "snyk": {"title": "Snyk", "text": "Snyk is commercial, sold in tiered licenses, and distinguished by deep integration into the developer workflow \u2014 IDE, pull requests, and source repos \u2014 in addition to scanning container images. Code and container scanning are separate capabilities under one platform, each requiring its own onboarding. Confirm the container-scanning piece is actually enabled \u2014 teams often adopt Snyk for code first and never circle back to turn on image scanning."}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>

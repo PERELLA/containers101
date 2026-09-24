@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inherited vs. Scoped</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin:0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height:1.5; padding: 28px 20px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.branch-wrap { display:flex; flex-direction:column; align-items:center; gap: 10px; margin-top: 10px; }
+.branch-wrap .node-btn.cap { max-width: 420px; padding: 12px 18px; text-align:center; }
+.branch-arrow { color: var(--text-muted); font-size: 20px; }
+.branch-row { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; max-width: 700px; }
+.branch-row .node-btn { padding: 14px 16px; text-align:left; }
+.branch-row .node-btn.caution { border-color: var(--caution); background: rgba(224,169,82,0.08); }
+.branch-row .node-btn.caution.active { border-color: var(--caution); background: rgba(224,169,82,0.18); }
+.branch-row .node-btn.pass { border-color: var(--pass); background: rgba(76,175,125,0.08); }
+.branch-row .node-btn.pass.active { border-color: var(--pass); background: rgba(76,175,125,0.18); }
+.branch-label.caution { color: var(--caution); font-weight:700; font-size:14px; margin-bottom:4px; }
+.branch-label.pass { color: var(--pass); font-weight:700; font-size:14px; margin-bottom:4px; }
+.branch-desc { font-size: 13px; color: var(--text-muted); }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Inherited vs. Scoped</h1>
+  <p class="intro">Without a dedicated binding, registry access often rides on whatever broad project-level role already exists — not a deliberate decision.</p>
+  
+<div class="branch-wrap">
+  <button class="node-btn cap" id="btn-identity" onclick="selectNode('identity')"><div class="node-label">Requesting Identity</div></button>
+  <div class="branch-arrow">&#8595;</div>
+  <div class="branch-row">
+    <button class="node-btn caution" id="btn-inherited" onclick="selectNode('inherited')"><div class="branch-label caution">Inherited Project Role</div><div class="branch-desc">A broad role like Editor.</div></button>
+    <button class="node-btn pass" id="btn-scoped" onclick="selectNode('scoped')"><div class="branch-label pass">Registry-Scoped Binding</div><div class="branch-desc">Built specifically for Artifact Registry.</div></button>
+  </div>
+  <div class="branch-arrow">&#8595;</div>
+  <button class="node-btn cap" id="btn-gar" onclick="selectNode('gar')"><div class="node-label">Google Artifact Registry</div></button>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"identity": {"title": "Requesting Identity", "text": "This is the user or service account requesting access to Artifact Registry. In Google Cloud, IAM permissions can be bound at several different levels of the resource hierarchy \u2014 organization, folder, project, or the specific resource itself \u2014 and a request's actual access depends on every binding that applies to it, not just the ones written with the registry in mind."}, "inherited": {"title": "Inherited Project Role \u2014 Caution", "text": "A broad role like Editor, granted at the project level, includes registry permissions as one of dozens of things it grants \u2014 usually not because anyone specifically decided this identity should have registry access, but because the project-level role was convenient to hand out for some other reason entirely. This is caution rather than an outright finding because it's extremely common and not always wrong, but it means registry access wasn't a deliberate decision, which is exactly the kind of access an assessor should trace back to its actual justification."}, "scoped": {"title": "Registry-Scoped Binding \u2014 Pass", "text": "A registry-scoped binding uses an IAM role built specifically for Artifact Registry (for example, Artifact Registry Reader or Writer) granted directly on the registry resource, rather than inherited from a broader project-level role. This is what deliberate, least-privilege access to a registry actually looks like \u2014 it's clear from the IAM policy itself why this identity has access, without having to reconstruct the reasoning from a chain of broader grants."}, "gar": {"title": "Google Artifact Registry", "text": "This is the destination either path leads to. The practical question for an assessor is simple to state and often surprisingly hard to answer without asking directly: for any given identity with registry access, was that access granted on purpose for this registry, or did it just come along for the ride with something broader?"}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>

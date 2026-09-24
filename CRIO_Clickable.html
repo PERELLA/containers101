@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Built for One Job</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin:0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height:1.5; padding: 28px 20px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.split-two { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px; }
+@media (max-width: 700px) { .split-two { grid-template-columns: 1fr; } }
+.split-two .node-btn { padding: 18px; text-align:left; }
+.split-list { list-style: none; margin: 8px 0 0; padding: 0; font-size: 13px; color: var(--text-muted); }
+.split-list li { padding: 3px 0; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Built for One Job</h1>
+  <p class="intro">CRI-O's minimalism isn't a limitation — it's the point. It does one job, for one purpose, and nothing else.</p>
+  
+<div class="split-two">
+  <button class="node-btn" id="btn-crio" onclick="selectNode('crio')">
+    <div class="node-label">CRI-O</div>
+    <ul class="split-list">
+      <li>Built to implement Kubernetes's CRI, and only that</li>
+      <li>No general CLI, no unrelated feature set</li>
+      <li>Common in OpenShift environments</li>
+    </ul>
+  </button>
+  <button class="node-btn" id="btn-general" onclick="selectNode('general')">
+    <div class="node-label">A General-Purpose Runtime</div>
+    <ul class="split-list">
+      <li>Built to run containers in many contexts, not just Kubernetes</li>
+      <li>Ships with a broader CLI and feature set</li>
+      <li>More surface area to configure — and to misconfigure</li>
+    </ul>
+  </button>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"crio": {"title": "CRI-O", "text": "CRI-O was purpose-built to do exactly one thing: implement Kubernetes's Container Runtime Interface. It has no general-purpose CLI, no bundled build tooling, and no feature that isn't in direct service of running containers for Kubernetes. That narrowness is a deliberate security posture \u2014 there's simply less installed, configured, and running, which means less that can be misconfigured or exploited. It shows up especially often in OpenShift environments, where it's the default runtime. On an engagement, a stripped-down CRI-O install with a minimal footprint is exactly what a well-run environment should look like \u2014 don't mistake that minimalism for a gap."}, "general": {"title": "A General-Purpose Runtime", "text": "A general-purpose runtime like Docker is built to run containers in many different contexts \u2014 a developer's laptop, a CI pipeline, a production server \u2014 not just inside Kubernetes. That flexibility comes from a broader feature set: a full CLI, image-building tools, networking and volume management, and more. Every one of those features is also something that has to be configured correctly, which is why a general-purpose runtime carries more surface area to review than a narrowly-scoped one like CRI-O. Neither is inherently more or less secure \u2014 they're just answering different questions about what the runtime needs to do."}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Who's Responsible</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin:0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height:1.5; padding: 28px 20px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.resp-list { display:flex; flex-direction:column; gap: 10px; margin-top: 10px; }
+.resp-list .node-btn { display:flex; align-items:center; gap: 14px; padding: 13px 16px; text-align:left; justify-content:flex-start; }
+.resp-badge { flex-shrink:0; font-size: 11px; font-weight: 700; color: var(--gold); border: 1px solid var(--gold-soft); border-radius: 20px; padding: 4px 10px; white-space: nowrap; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Who's Responsible</h1>
+  <p class="intro">With a self-hosted registry, there's no shared responsibility model to lean on. Every item below lands on the organization, full stop.</p>
+  
+<div class="resp-list">
+  <button class="node-btn" id="btn-patching" onclick="selectNode('patching')"><div class="resp-badge">Org Owns It</div><div class="node-hint">Patching the registry's underlying infrastructure.</div></button>
+  <button class="node-btn" id="btn-backup" onclick="selectNode('backup')"><div class="resp-badge">Org Owns It</div><div class="node-hint">Backups.</div></button>
+  <button class="node-btn" id="btn-logging" onclick="selectNode('logging')"><div class="resp-badge">Org Owns It</div><div class="node-hint">Access logging.</div></button>
+  <button class="node-btn" id="btn-monitoring" onclick="selectNode('monitoring')"><div class="resp-badge">Org Owns It</div><div class="node-hint">Ongoing monitoring.</div></button>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"patching": {"title": "Patching", "text": "With a self-hosted registry \u2014 something like Harbor or JFrog Artifactory running on the organization's own infrastructure \u2014 there's no cloud provider quietly patching the underlying platform in the background. Every patch has to be identified, tested, and applied by the organization's own team, on their own schedule. On an engagement, ask for the actual patch history, not just a statement of the patching policy \u2014 a policy that says monthly patching and a log showing the last patch was eight months ago tell very different stories."}, "backup": {"title": "Backups", "text": "If a self-hosted registry's data is lost \u2014 through hardware failure, a bad upgrade, or a ransomware event \u2014 nothing restores it unless the organization built and tested its own backup and recovery process. This is easy to overlook because a registry running fine day to day gives no signal about whether it's actually recoverable if something goes wrong. The right question is whether a restore has ever actually been tested, not just whether backups are being taken."}, "logging": {"title": "Access Logging", "text": "Without access logging explicitly configured, there's no record of who pulled or pushed which image and when \u2014 which matters both for day-to-day security monitoring and for reconstructing what happened after an incident. Cloud-hosted registries typically log this by default as part of the platform; a self-hosted registry only logs it if someone deliberately configured it to."}, "monitoring": {"title": "Ongoing Monitoring", "text": "Uptime, disk space, certificate expiration, unusual access patterns \u2014 all of it depends on someone actively watching this system, not just having it technically capable of being monitored. A dashboard that exists but nobody looks at provides the same practical security value as no dashboard at all. Ask who owns this responsibility day to day, by name or by team, not just whether monitoring tooling is technically in place."}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>
