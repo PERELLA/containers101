@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What's Inside Docker</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin:0; background: transparent; color: var(--text); font-family: var(--sans); line-height:1.5; }
+.wrap { max-width: 980px; margin: 0 auto; background: var(--bg); padding: 24px 20px 28px; border-radius: 8px; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.docker-flow { display:flex; flex-direction:column; align-items:center; gap: 10px; margin-top: 10px; }
+.flow-top { display:flex; align-items:center; gap: 14px; flex-wrap: wrap; justify-content:center; }
+.docker-flow .node-btn { padding: 14px 18px; max-width: 190px; }
+.arrow-h { color: var(--text-muted); font-size: 20px; }
+.arrow-v { color: var(--text-muted); font-size: 20px; }
+.flow-bottom { display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; max-width: 700px; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>What's Inside Docker</h1>
+  <p class="intro">Before getting into assessment considerations, here's the basic shape of Docker itself — one background service doing the work, and a few things it manages.</p>
+  
+<div class="docker-flow">
+  <div class="flow-top">
+    <button class="node-btn" id="btn-cli" onclick="selectNode('cli')">
+      <div class="node-label">Docker CLI</div>
+      <div class="node-hint">What you type into.</div>
+    </button>
+    <div class="arrow-h">&#8594;</div>
+    <button class="node-btn" id="btn-daemon" onclick="selectNode('daemon')">
+      <div class="node-label">Docker Daemon</div>
+      <div class="node-hint">Does the real work.</div>
+    </button>
+  </div>
+  <div class="arrow-v">&#8595;</div>
+  <div class="flow-bottom">
+    <button class="node-btn" id="btn-images" onclick="selectNode('images')">
+      <div class="node-label">Images</div>
+      <div class="node-hint">Read-only templates.</div>
+    </button>
+    <button class="node-btn" id="btn-containers" onclick="selectNode('containers')">
+      <div class="node-label">Containers</div>
+      <div class="node-hint">Running instances.</div>
+    </button>
+    <button class="node-btn" id="btn-compose" onclick="selectNode('compose')">
+      <div class="node-label">Docker Compose</div>
+      <div class="node-hint">Multi-container config.</div>
+    </button>
+  </div>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"cli": {"title": "Docker CLI", "text": "The Docker CLI is the command interface a person or a build script actually types into \u2014 commands like docker build or docker run. The CLI itself doesn't do any of the real work; it packages up your command and sends it to the Docker daemon over an API, typically through a local Unix socket. That distinction matters for assessment: securing the CLI isn't the point, securing the daemon and the socket it listens on is."}, "daemon": {"title": "Docker Daemon", "text": "The Docker daemon (dockerd) is the background service doing the actual work \u2014 building images, pulling them from registries, starting and stopping containers, and managing the networks and volumes they use. It has historically run with root-level privileges on the host. That's the single most important fact for assessment purposes: if the daemon's socket is exposed insecurely \u2014 for example, over the network without TLS and client certificate authentication \u2014 that exposure can amount to root access on the entire host, not just to one container."}, "images": {"title": "Images", "text": "An image is the read-only, packaged template a container is built from \u2014 typically defined by a Dockerfile and built up in layers, each layer representing one instruction (installing a package, copying in application code, and so on). Images are immutable once built: any change requires building a new image, not modifying the existing one. Images can be stored locally on a host or pushed to a registry \u2014 public, private cloud-hosted, or self-hosted \u2014 for distribution."}, "containers": {"title": "Containers", "text": "A container is a running instance of an image \u2014 the daemon takes an image, unpacks it, and executes it as an isolated process using namespaces and control groups. Containers are typically ephemeral by design: they're expected to be stopped, removed, and replaced with a fresh instance from the same image rather than patched or modified in place, which is part of what makes immutability a meaningful security property in practice."}, "compose": {"title": "Docker Compose", "text": "Docker Compose is a YAML configuration file (and companion CLI tool) that describes how several containers should run together as one application \u2014 for example, a web app container, a database container, and a caching layer, along with the networking and volumes connecting them. It's extremely common in local development environments. In production, especially in larger Kubernetes-based deployments, Compose shows up far less often \u2014 so if it is present, it's worth asking how that configuration is reviewed and controlled, since it can otherwise fly under the radar of more formal change-management processes."}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>

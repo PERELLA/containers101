@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Containers 101 — Match the Scanning Tool</title>
+<style>
+  :root {
+    --bg: #12161C;
+    --panel: #1A2029;
+    --panel-border: #2A323D;
+    --text: #E7EAEE;
+    --text-muted: #9AA5B1;
+    --gold: #C9A227;
+    --gold-soft: #8A6D1E;
+    --pass: #4CAF7D;
+    --finding: #E0625A;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; background: var(--bg); padding: 28px 20px 32px; border-radius: 8px; }
+  header { margin-bottom: 26px; }
+  .eyebrow {
+    color: var(--gold);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-size: 24px;
+    margin: 0 0 10px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .intro {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 620px;
+  }
+  .progress-bar {
+    margin-top: 20px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--panel-border);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-soft), var(--gold));
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 18px 18px 16px;
+    margin-top: 14px;
+    transition: border-color 0.25s ease;
+  }
+  .card.solved { border-color: var(--pass); }
+  .scenario-text {
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .pill {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--panel-border);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    font-family: var(--sans);
+  }
+  .pill:hover { border-color: var(--gold-soft); }
+  .pill.correct {
+    background: rgba(76,175,125,0.15);
+    border-color: var(--pass);
+    color: var(--pass);
+    cursor: default;
+  }
+  .pill.wrong {
+    background: rgba(224,98,90,0.15);
+    border-color: var(--finding);
+    color: var(--finding);
+  }
+  .pill:disabled { cursor: default; }
+  .feedback {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--panel-border);
+    font-size: 13.5px;
+    color: var(--text-muted);
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback strong { color: var(--gold); }
+  .completion-panel {
+    margin-top: 26px;
+    text-align: center;
+    padding: 26px 20px;
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(201,162,39,0.08), rgba(201,162,39,0.02));
+    border: 1px solid var(--gold-soft);
+    display: none;
+  }
+  .completion-panel.show { display: block; }
+  .completion-panel p {
+    color: var(--text-muted);
+    font-size: 14px;
+    max-width: 480px;
+    margin: 6px auto 0;
+  }
+  footer {
+    margin-top: 32px;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--panel-border);
+    padding-top: 14px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .progress-fill, .card { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Containers 101 · Course Summary</div>
+    <h1>Match the Scanning Tool</h1>
+    <p class="intro">Pick which tool each scenario describes. Where the tool sits in the workflow, and what it actually covers, is the tell.</p>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 5 matched</div>
+  </header>
+
+  <div id="cards"></div>
+
+  <div class="completion-panel" id="completionPanel">
+    <div class="eyebrow" style="text-align:center;">All matched</div>
+    <p>All three tools catch vulnerabilities. What actually matters on an engagement is where each one sits, what it's connected to, and whether it's enforcing anything — not just which one is installed.</p>
+  </div>
+
+  <footer>
+    Containers 101 · Schellman eLearning Program — Course Summary
+  </footer>
+</div>
+
+<script>
+  const scenarios = [
+    {
+      text: "The tool is wired into the CI pipeline and scans container images, the filesystem, and IaC templates before merge.",
+      answer: "trivy",
+      feedback: "<strong>On the engagement:</strong> that broad, pipeline-embedded coverage is Trivy's signature strength — open source and easy to drop into a build."
+    },
+    {
+      text: "The tool scans images automatically as they land in a connected registry, but a second registry added months ago was never wired in.",
+      answer: "clair",
+      feedback: "<strong>On the engagement:</strong> this is exactly Clair's per-registry connection requirement — it doesn't auto-discover new registries, so gaps like this are easy to introduce."
+    },
+    {
+      text: "Developers see scan results directly in pull requests and their IDE, covering both application dependencies and container images.",
+      answer: "snyk",
+      feedback: "<strong>On the engagement:</strong> that developer-workflow integration, spanning code and containers together, is Snyk's model."
+    },
+    {
+      text: "It's open source, integrates into the build pipeline, and can generate an SBOM for critical images.",
+      answer: "trivy",
+      feedback: "<strong>On the engagement:</strong> SBOM generation alongside broad scan scope is a Trivy hallmark — worth confirming it's actually being generated, not just capable of it."
+    },
+    {
+      text: "Licensing is tiered by seat, and the team originally adopted it for code scanning — nobody has confirmed the container-scanning piece is turned on.",
+      answer: "snyk",
+      feedback: "<strong>On the engagement:</strong> this is the exact gap to check for with Snyk — code coverage doesn't guarantee image coverage was ever enabled."
+    }
+  ];
+
+  const typeLabels = { trivy: "Trivy", clair: "Clair", snyk: "Snyk" };
+  let solvedCount = 0;
+
+  function render() {
+    const container = document.getElementById('cards');
+    scenarios.forEach((s, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = 'card-' + i;
+
+      const textEl = document.createElement('div');
+      textEl.className = 'scenario-text';
+      textEl.textContent = s.text;
+      card.appendChild(textEl);
+
+      const pillsEl = document.createElement('div');
+      pillsEl.className = 'pills';
+      Object.keys(typeLabels).forEach(key => {
+        const btn = document.createElement('button');
+        btn.className = 'pill';
+        btn.textContent = typeLabels[key];
+        btn.onclick = () => attempt(i, key, btn);
+        pillsEl.appendChild(btn);
+      });
+      card.appendChild(pillsEl);
+
+      const feedbackEl = document.createElement('div');
+      feedbackEl.className = 'feedback';
+      feedbackEl.id = 'feedback-' + i;
+      feedbackEl.innerHTML = s.feedback;
+      card.appendChild(feedbackEl);
+
+      container.appendChild(card);
+    });
+  }
+
+  function attempt(index, key, btn) {
+    const card = document.getElementById('card-' + index);
+    if (card.classList.contains('solved')) return;
+
+    if (key === scenarios[index].answer) {
+      btn.classList.add('correct');
+      card.querySelectorAll('.pill').forEach(p => p.disabled = true);
+      card.classList.add('solved');
+      document.getElementById('feedback-' + index).classList.add('show');
+      solvedCount++;
+      updateProgress();
+    } else {
+      btn.classList.add('wrong');
+      setTimeout(() => btn.classList.remove('wrong'), 600);
+    }
+  }
+
+  function updateProgress() {
+    document.getElementById('progressFill').style.width = (solvedCount / scenarios.length * 100) + '%';
+    document.getElementById('progressLabel').textContent = solvedCount + ' of ' + scenarios.length + ' matched';
+    if (solvedCount === scenarios.length) {
+      document.getElementById('completionPanel').classList.add('show');
+    }
+  }
+
+  render();
+</script>
+</body>
+</html>

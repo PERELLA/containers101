@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivy's Reach</title>
+<style>
+:root {
+  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+  --text: #E7EAEE; --text-muted: #9AA5B1;
+  --gold: #C9A227; --gold-soft: #8A6D1E;
+  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin:0; background: transparent; color: var(--text); font-family: var(--sans); line-height:1.5; }
+.wrap { max-width: 980px; margin: 0 auto; background: var(--bg); padding: 24px 20px 28px; border-radius: 8px; }
+h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
+.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+.node-btn {
+  font-family: var(--sans); cursor: pointer; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
+}
+.node-btn:hover { border-color: var(--gold-soft); }
+.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+.node-hint { font-size: 12px; color: var(--text-muted); }
+.detail-panel {
+  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
+  min-height: 90px;
+}
+.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text); }
+.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+
+
+.fanout { display:flex; flex-direction:column; align-items:center; gap: 14px; margin-top: 10px; }
+.fanout .node-btn.hub { border-radius: 50px; padding: 14px 30px; }
+.fanout-arrows { color: var(--text-muted); font-size: 13px; }
+.fanout-targets { display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; width: 100%; }
+.fanout .node-btn { padding: 14px 10px; }
+@media (max-width: 700px) { .fanout-targets { grid-template-columns: 1fr 1fr; } }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Trivy's Reach</h1>
+  <p class="intro">One open-source tool, four different targets — that breadth is exactly why Trivy shows up so often in CI/CD pipelines.</p>
+  
+<div class="fanout">
+  <button class="node-btn hub" id="btn-trivy" onclick="selectNode('trivy')">
+    <div class="node-label">Trivy</div>
+  </button>
+  <div class="fanout-arrows">&#8595; &#8595; &#8595; &#8595;</div>
+  <div class="fanout-targets">
+    <button class="node-btn" id="btn-images" onclick="selectNode('images')">
+      <div class="node-label">Images</div>
+      <div class="node-hint">Container image contents</div>
+    </button>
+    <button class="node-btn" id="btn-fs" onclick="selectNode('fs')">
+      <div class="node-label">Filesystems</div>
+      <div class="node-hint">Files outside a container</div>
+    </button>
+    <button class="node-btn" id="btn-iac" onclick="selectNode('iac')">
+      <div class="node-label">IaC Templates</div>
+      <div class="node-hint">Infrastructure-as-code configs</div>
+    </button>
+    <button class="node-btn" id="btn-sbom" onclick="selectNode('sbom')">
+      <div class="node-label">SBOM Output</div>
+      <div class="node-hint">Inventory for critical images</div>
+    </button>
+  </div>
+</div>
+
+  <p class="hint">Click any box to learn more.</p>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+  </div>
+</div>
+<script>
+const details = {"trivy": {"title": "Trivy", "text": "Trivy is a free, open-source scanning tool from Aqua Security. It's typically invoked as a command-line tool, as a step inside a CI/CD pipeline, or, in Kubernetes environments, as a continuously-running operator that scans workloads already deployed in a cluster. Its defining trait is breadth \u2014 rather than doing one narrow job, it scans several very different kinds of targets, which is why it shows up in so many different places in a client's toolchain."}, "images": {"title": "Images", "text": "Scanning a container image means checking every layer's contents \u2014 OS-level packages, language-specific dependencies (like npm or pip packages), and any other installed software \u2014 against a continuously updated database of known vulnerabilities (CVEs). This is the most common use of Trivy and the one most similar to what Clair or Snyk's container scanning does, though Trivy's database and detection engine are its own."}, "fs": {"title": "Filesystems", "text": "Beyond images, Trivy can scan an arbitrary filesystem or a source code repository directly \u2014 for example, scanning a git repository's declared dependencies for known vulnerabilities before that code has even been containerized. This is useful for catching problems earlier in the pipeline, before an image is ever built, rather than only catching them at the image-scanning stage."}, "iac": {"title": "IaC Templates", "text": "Trivy can also scan infrastructure-as-code files \u2014 Terraform, CloudFormation, Kubernetes manifests, and similar \u2014 for misconfigurations before they're ever applied. Examples include a storage bucket configured for public access, a container spec that runs as root, or a security group with an overly broad inbound rule. Catching this at the template stage, before deployment, is generally far cheaper to fix than catching it after the resource already exists in production."}, "sbom": {"title": "SBOM Output", "text": "An SBOM, or Software Bill of Materials, is a formal, structured inventory of every component and dependency that makes up an image \u2014 typically produced in a standard format like CycloneDX or SPDX. Trivy can generate one directly. The practical value of an SBOM shows up later: when a new CVE is disclosed for some widely-used library, an SBOM lets an organization quickly determine which of its images actually contain that library, rather than having to re-scan everything from scratch to find out."}};
+function selectNode(key) {
+  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const panel = document.getElementById('detailPanel');
+  const d = details[key];
+  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+</script>
+</body>
+</html>
