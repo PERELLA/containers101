@@ -3,81 +3,159 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Connected vs. Not</title>
+<title>Connected vs. Not — Animated</title>
 <style>
-:root {
-  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
-  --text: #E7EAEE; --text-muted: #9AA5B1;
-  --gold: #C9A227; --gold-soft: #8A6D1E;
-  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
-  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-* { box-sizing: border-box; }
-html, body { margin:0; background: transparent; color: var(--text); font-family: var(--sans); line-height:1.5; }
-.wrap { max-width: 980px; margin: 0 auto; background: var(--bg); padding: 24px 20px 28px; border-radius: 8px; }
-h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
-.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
-.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
-.node-btn {
-  font-family: var(--sans); cursor: pointer; text-align: center;
-  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
-  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
-}
-.node-btn:hover { border-color: var(--gold-soft); }
-.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
-.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
-.node-hint { font-size: 12px; color: var(--text-muted); }
-.detail-panel {
-  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
-  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
-  min-height: 90px;
-}
-.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
-.detail-text { font-size: 14px; color: var(--text); }
-.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+  :root {
+    --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+    --text: #E7EAEE; --text-muted: #9AA5B1;
+    --gold: #C9A227; --gold-soft: #8A6D1E;
+    --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+    --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; background: transparent; color: var(--text); font-family: var(--sans); line-height:1.5; }
+  .wrap { max-width: 980px; margin: 0 auto; background: var(--bg); padding: 24px 20px 28px; border-radius: 8px; }
+  h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+  .intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 18px; }
 
+  .illustration {
+    background: #0D1117;
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 20px 0 10px;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .illustration svg { width: 100%; height: auto; display:block; }
 
-.clair-wrap { display:flex; flex-direction:column; align-items:center; gap: 14px; margin-top: 10px; }
-.clair-wrap .node-btn.hub { border-radius: 50px; padding: 14px 30px; }
-.clair-registries { display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; max-width: 700px; }
-.clair-registries .node-btn { padding: 14px; text-align:center; }
-.clair-registries .node-btn.connected { border-color: var(--pass); }
-.clair-registries .node-btn.connected.active { background: rgba(76,175,125,0.15); }
-.clair-registries .node-btn.gap { border-color: var(--finding); border-style: dashed; }
-.clair-registries .node-btn.gap.active { background: rgba(224,98,90,0.15); }
-.registry-status.connected { color: var(--pass); font-size:12px; }
-.registry-status.gap { color: var(--finding); font-size:12px; }
+  .hub-box { fill: var(--panel); stroke: var(--gold-soft); stroke-width: 2; transition: stroke-width .3s ease, filter .3s ease; }
+  .hub-label { fill: var(--gold); font-size: 15px; font-weight: 700; font-family: var(--sans); text-anchor: middle; }
 
+  .reg-box { fill: var(--panel); stroke: var(--panel-border); stroke-width: 1.5; transition: stroke .3s ease, opacity .3s ease; }
+  .reg-box.connected { stroke: var(--pass); }
+  .reg-box.gap { stroke: var(--finding); stroke-dasharray: 6 4; }
+  .reg-label { fill: var(--text); font-size: 13px; font-weight: 700; font-family: var(--sans); text-anchor: middle; }
+  .reg-status { font-size: 11px; font-family: var(--sans); text-anchor: middle; }
+  .reg-status.connected { fill: var(--pass); }
+  .reg-status.gap { fill: var(--finding); }
+
+  .connector { fill: none; stroke: var(--panel-border); stroke-width: 2; }
+  .connector.connected { stroke: #2F4A3C; }
+  .connector.gap { stroke: var(--finding); stroke-dasharray: 5 5; opacity: 0.6; }
+
+  .pulse { fill: var(--pass); r: 5; }
+  .pulse.gap-pulse { fill: var(--finding); }
+
+  /* highlight state when a registry is selected */
+  .illustration[data-stage="a"] #connector-a, .illustration[data-stage="b"] #connector-b {
+    stroke-width: 3;
+  }
+  .illustration[data-stage="a"] #box-a, .illustration[data-stage="b"] #box-b,
+  .illustration[data-stage="c"] #box-c {
+    filter: drop-shadow(0 0 4px rgba(201,162,39,0.5));
+  }
+  .illustration[data-stage="c"] #connector-c { stroke-width: 2.5; opacity: 1; }
+
+  /* ---- Buttons / detail panel ---- */
+  .stage-row { display:flex; gap: 10px; flex-wrap: wrap; }
+  .node-btn {
+    flex: 1; min-width: 150px; font-family: var(--sans); cursor: pointer; text-align: left;
+    background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+    color: var(--text); padding: 14px 16px; transition: border-color 0.2s ease, background 0.2s ease;
+  }
+  .node-btn:hover { border-color: var(--gold-soft); }
+  .node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+  .node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+  .node-hint { font-size: 12px; color: var(--text-muted); }
+  .hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+  .detail-panel {
+    margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+    background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft); min-height: 90px;
+  }
+  .detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+  .detail-text { font-size: 14px; color: var(--text); }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Connected vs. Not</h1>
-  <p class="intro">Clair doesn't auto-discover new registries. Every one has to be explicitly wired in — and a newly added registry is the easiest one to forget.</p>
-  
-<div class="clair-wrap">
-  <button class="node-btn hub" id="btn-clair" onclick="selectNode('clair')"><div class="node-label">Clair</div></button>
-  <div class="clair-registries">
-    <button class="node-btn connected" id="btn-a" onclick="selectNode('a')"><div class="node-label">Registry A</div><div class="registry-status connected">Connected — scanned</div></button>
-    <button class="node-btn connected" id="btn-b" onclick="selectNode('b')"><div class="node-label">Registry B</div><div class="registry-status connected">Connected — scanned</div></button>
-    <button class="node-btn gap" id="btn-c" onclick="selectNode('c')"><div class="node-label">Registry C (new)</div><div class="registry-status gap">Not connected — blind spot</div></button>
+  <p class="intro">Clair doesn't auto-discover new registries. Every one has to be explicitly wired in — watch the pulse reach two registries and break before the third.</p>
+
+  <div class="illustration" id="illustration" data-stage="clair">
+    <svg viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg">
+      <!-- connectors, drawn first so boxes sit on top -->
+      <path id="connector-a" class="connector connected" d="M 350,70 C 350,110 170,110 170,150"></path>
+      <path id="connector-b" class="connector connected" d="M 350,70 L 350,150"></path>
+      <path id="connector-c" class="connector gap" d="M 350,70 C 350,110 530,110 530,150"></path>
+
+      <!-- traveling pulses along the connected paths, looping -->
+      <circle class="pulse">
+        <animateMotion dur="1.8s" repeatCount="indefinite" path="M 350,70 C 350,110 170,110 170,150"></animateMotion>
+      </circle>
+      <circle class="pulse">
+        <animateMotion dur="1.8s" begin="0.6s" repeatCount="indefinite" path="M 350,70 L 350,150"></animateMotion>
+      </circle>
+
+      <!-- pulse that tries to reach Registry C, fades out partway -->
+      <circle class="pulse gap-pulse">
+        <animateMotion dur="1.6s" repeatCount="indefinite" path="M 350,70 C 350,100 470,100 500,128"></animateMotion>
+        <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.6;1" dur="1.6s" repeatCount="indefinite"></animate>
+      </circle>
+
+      <!-- hub -->
+      <rect class="hub-box" x="290" y="20" width="120" height="50" rx="25"></rect>
+      <text class="hub-label" x="350" y="51">Clair</text>
+
+      <!-- registry boxes -->
+      <rect class="reg-box connected" id="box-a" x="70" y="150" width="200" height="66" rx="8"></rect>
+      <text class="reg-label" x="170" y="178">Registry A</text>
+      <text class="reg-status connected" x="170" y="198">Connected — scanned</text>
+
+      <rect class="reg-box connected" id="box-b" x="250" y="150" width="200" height="66" rx="8"></rect>
+      <text class="reg-label" x="350" y="178">Registry B</text>
+      <text class="reg-status connected" x="350" y="198">Connected — scanned</text>
+
+      <rect class="reg-box gap" id="box-c" x="430" y="150" width="200" height="66" rx="8"></rect>
+      <text class="reg-label" x="530" y="178">Registry C (new)</text>
+      <text class="reg-status gap" x="530" y="198">Not connected — blind spot</text>
+    </svg>
+  </div>
+
+  <div class="stage-row">
+    <button class="node-btn active" id="btn-clair" onclick="selectStage('clair')">
+      <div class="node-label">Clair</div>
+      <div class="node-hint">Registry-integrated scanner.</div>
+    </button>
+    <button class="node-btn" id="btn-a" onclick="selectStage('a')">
+      <div class="node-label">Registry A</div>
+      <div class="node-hint">Connected — scanned.</div>
+    </button>
+    <button class="node-btn" id="btn-b" onclick="selectStage('b')">
+      <div class="node-label">Registry B</div>
+      <div class="node-hint">Connected — scanned.</div>
+    </button>
+    <button class="node-btn" id="btn-c" onclick="selectStage('c')">
+      <div class="node-label">Registry C (new)</div>
+      <div class="node-hint">Not connected — blind spot.</div>
+    </button>
+  </div>
+  <p class="hint">Click any box to learn more.</p>
+
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">Clair</div>
+    <div class="detail-text">Clair is an open-source, API-driven vulnerability scanner most commonly paired with a registry platform like Quay — it scans images as they land in a registry it's connected to, rather than as a step in a CI pipeline the way Trivy typically works. Its architecture means scanning happens automatically once set up, but that automation only covers the registries it's actually been told about.</div>
   </div>
 </div>
 
-  <p class="hint">Click any box to learn more.</p>
-  <div class="detail-panel" id="detailPanel">
-    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
-  </div>
-</div>
 <script>
 const details = {"clair": {"title": "Clair", "text": "Clair is an open-source, API-driven vulnerability scanner most commonly paired with a registry platform like Quay \u2014 it scans images as they land in a registry it's connected to, rather than as a step in a CI pipeline the way Trivy typically works. Its architecture means scanning happens automatically once set up, but that automation only covers the registries it's actually been told about."}, "a": {"title": "Registry A \u2014 Connected", "text": "This registry was connected to Clair when the scanning program was first set up, and every image landing in it is being checked against Clair's vulnerability database automatically. This is the state every registry in an environment should be in \u2014 the question worth asking is simply how the organization confirms this connection is still active and the database is current."}, "b": {"title": "Registry B \u2014 Connected", "text": "Same as Registry A \u2014 actively connected and scanned. Having more than one registry connected is normal in larger environments; the point of showing two connected registries here is to make Registry C's gap stand out by contrast, since coverage gaps are rarely total \u2014 they're usually one registry out of several."}, "c": {"title": "Registry C (new) \u2014 Not Connected", "text": "This is the coverage gap in practice: a registry added after Clair's initial setup, never wired into the scanning configuration, quietly sitting outside coverage while everyone assumes scanning covers everything. Clair does not auto-discover new registries \u2014 someone has to deliberately configure the connection, and if that step gets missed during a registry migration or a new environment stand-up, this is exactly what results. On an engagement, always ask for the full list of registries in use first, then check that list against what Clair is actually configured to scan \u2014 don't just confirm that scanning exists somewhere."}};
-function selectNode(key) {
+function selectStage(key) {
   document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('btn-' + key).classList.add('active');
-  const panel = document.getElementById('detailPanel');
+  document.getElementById('illustration').setAttribute('data-stage', key);
   const d = details[key];
-  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+  document.getElementById('detailPanel').innerHTML =
+    '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
 }
 </script>
 </body>

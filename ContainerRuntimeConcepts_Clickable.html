@@ -3,88 +3,210 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inside a Running Container</title>
+<title>Inside a Running Container — Animated Prototype</title>
 <style>
-:root {
-  --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
-  --text: #E7EAEE; --text-muted: #9AA5B1;
-  --gold: #C9A227; --gold-soft: #8A6D1E;
-  --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
-  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-* { box-sizing: border-box; }
-html, body { margin:0; background: transparent; color: var(--text); font-family: var(--sans); line-height:1.5; }
-.wrap { max-width: 980px; margin: 0 auto; background: var(--bg); padding: 24px 20px 28px; border-radius: 8px; }
-h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
-.intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 20px; }
-.hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
-.node-btn {
-  font-family: var(--sans); cursor: pointer; text-align: center;
-  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
-  color: var(--text); transition: border-color 0.2s ease, background 0.2s ease;
-}
-.node-btn:hover { border-color: var(--gold-soft); }
-.node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
-.node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
-.node-hint { font-size: 12px; color: var(--text-muted); }
-.detail-panel {
-  margin-top: 18px; padding: 18px 20px; border-radius: 8px;
-  background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft);
-  min-height: 90px;
-}
-.detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
-.detail-text { font-size: 14px; color: var(--text); }
-.detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
+  :root {
+    --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+    --text: #E7EAEE; --text-muted: #9AA5B1;
+    --gold: #C9A227; --gold-soft: #8A6D1E;
+    --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+    --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; background: transparent; color: var(--text); font-family: var(--sans); line-height:1.5; }
+  .wrap { max-width: 980px; margin: 0 auto; background: var(--bg); padding: 24px 20px 28px; border-radius: 8px; }
+  h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+  .intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 18px; }
 
+  /* ---- Illustration ---- */
+  .illustration {
+    background: #0D1117;
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 10px 0 0;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .illustration svg { width: 100%; height: auto; display:block; }
 
-.stack { display:flex; flex-direction:column; align-items:center; gap:0; margin-top: 10px; }
-.stack .node-btn { width:100%; max-width:660px; padding: 16px 20px; text-align:left; }
-.stack-arrow { color: var(--text-muted); font-size: 20px; margin: 2px 0; }
+  .process-box { fill: var(--panel); stroke: #3A4453; stroke-width: 1.5; transition: opacity .5s ease, filter .5s ease; }
+  .process-label { fill: var(--text-muted); font-size: 11px; font-family: var(--sans); text-anchor: middle; transition: opacity .5s ease; }
+  .stem { stroke: #3A4453; stroke-width: 2; transition: opacity .5s ease; }
+  .kernel-base { fill: var(--panel); stroke: var(--gold-soft); stroke-width: 1.5; }
+  .kernel-label { fill: var(--gold); font-size: 12px; font-weight: 700; font-family: var(--sans); text-anchor: middle; }
+  .ripple { fill: none; stroke: var(--gold); stroke-width: 2; opacity: 0; transform-origin: 350px 215px; }
 
+  .focus-box { fill: #1F2733; stroke: #3A4453; stroke-width: 1.5; }
+
+  .boundary {
+    fill: none; stroke: var(--pass); stroke-width: 2; stroke-dasharray: 8 6;
+    stroke-dashoffset: 400; opacity: 0;
+    transition: stroke-dashoffset 1.1s ease, opacity .3s ease;
+  }
+  .boundary-label { fill: var(--pass); font-size: 11px; font-weight:700; font-family: var(--sans); text-anchor: middle; opacity: 0; transition: opacity .6s ease .5s; }
+
+  .gauge-track { fill: #1F2733; stroke: #3A4453; stroke-width: 1.5; opacity: 0; transition: opacity .3s ease; }
+  .gauge-fill { fill: var(--caution); opacity: 0; transition: opacity .3s ease; }
+  .gauge-ceiling { stroke: var(--finding); stroke-width: 2; stroke-dasharray: 4 3; opacity: 0; transition: opacity .4s ease .6s; }
+  .gauge-label { fill: var(--caution); font-size: 10px; font-family: var(--sans); text-anchor: middle; opacity: 0; transition: opacity .5s ease .6s; }
+
+  .run-pulse { animation: none; }
+
+  /* Default: dim the ripple, hide boundary/gauge */
+  .illustration[data-stage="kernel"] .ripple { animation: rippleAnim 2.2s ease-out infinite; }
+  .illustration[data-stage="kernel"] .process-box.other,
+  .illustration[data-stage="kernel"] .process-box.focus { opacity: 1; filter: none; }
+
+  .illustration[data-stage="ns"] .process-box.other { opacity: 0.25; filter: grayscale(1); }
+  .illustration[data-stage="ns"] .process-label.other { opacity: 0.25; }
+  .illustration[data-stage="ns"] .boundary { stroke-dashoffset: 0; opacity: 1; }
+  .illustration[data-stage="ns"] .boundary-label { opacity: 1; }
+  .illustration[data-stage="ns"] .ripple { animation: rippleAnim 3.5s ease-out infinite; opacity: 0.4; }
+
+  .illustration[data-stage="cgroups"] .process-box.other { opacity: 0.4; }
+  .illustration[data-stage="cgroups"] .gauge-track { opacity: 1; }
+  .illustration[data-stage="cgroups"] .gauge-fill { opacity: 1; height: var(--fill-h, 46px); }
+  .illustration[data-stage="cgroups"] .gauge-ceiling { opacity: 1; }
+  .illustration[data-stage="cgroups"] .gauge-label { opacity: 1; }
+  .illustration[data-stage="cgroups"] .ripple { animation: rippleAnim 3.5s ease-out infinite; opacity: 0.4; }
+
+  .illustration[data-stage="process"] .process-box.other { opacity: 0.25; filter: grayscale(1); }
+  .illustration[data-stage="process"] .process-label.other { opacity: 0.25; }
+  .illustration[data-stage="process"] .boundary { stroke-dashoffset: 0; opacity: 1; }
+  .illustration[data-stage="process"] .boundary-label { opacity: 1; }
+  .illustration[data-stage="process"] .gauge-track { opacity: 1; }
+  .illustration[data-stage="process"] .gauge-fill { opacity: 1; height: var(--fill-h, 46px); }
+  .illustration[data-stage="process"] .gauge-ceiling { opacity: 1; }
+  .illustration[data-stage="process"] .gauge-label { opacity: 1; }
+  .illustration[data-stage="process"] .focus-box { animation: runPulse 1.6s ease-in-out infinite; }
+  .illustration[data-stage="process"] .ripple { animation: rippleAnim 3.5s ease-out infinite; opacity: 0.4; }
+
+  @keyframes rippleAnim {
+    0%   { opacity: 0.55; transform: scale(1); }
+    100% { opacity: 0;    transform: scale(1.6); }
+  }
+  @keyframes runPulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.04); }
+  }
+  .illustration svg .focus-box { transform-origin: 350px 150px; }
+
+  /* ---- Buttons / detail panel (same pattern as the rest of the course) ---- */
+  .stage-row { display:flex; gap: 10px; flex-wrap: wrap; }
+  .node-btn {
+    flex: 1; min-width: 150px; font-family: var(--sans); cursor: pointer; text-align: left;
+    background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px;
+    color: var(--text); padding: 14px 16px; transition: border-color 0.2s ease, background 0.2s ease;
+  }
+  .node-btn:hover { border-color: var(--gold-soft); }
+  .node-btn.active { border-color: var(--gold); background: rgba(201,162,39,0.1); }
+  .node-label { font-weight:700; font-size: 14.5px; margin-bottom: 3px; }
+  .node-hint { font-size: 12px; color: var(--text-muted); }
+  .hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+  .detail-panel {
+    margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+    background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft); min-height: 90px;
+  }
+  .detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+  .detail-text { font-size: 14px; color: var(--text); }
+  .detail-placeholder { color: var(--text-muted); font-size: 14px; font-style: italic; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Inside a Running Container</h1>
-  <p class="intro">Namespaces and control groups are the two kernel features doing the actual work of isolation — everything a runtime does builds on these.</p>
-  
-<div class="stack">
-  <button class="node-btn" id="btn-kernel" onclick="selectNode('kernel')">
-    <div class="node-label">Host Kernel</div>
-    <div class="node-hint">The single kernel every container on this host shares.</div>
-  </button>
-  <div class="stack-arrow">&#8595;</div>
-  <button class="node-btn" id="btn-ns" onclick="selectNode('ns')">
-    <div class="node-label">Namespaces</div>
-    <div class="node-hint">Isolate what a container can see.</div>
-  </button>
-  <div class="stack-arrow">&#8595;</div>
-  <button class="node-btn" id="btn-cgroups" onclick="selectNode('cgroups')">
-    <div class="node-label">Control Groups (cgroups)</div>
-    <div class="node-hint">Limit what a container can use.</div>
-  </button>
-  <div class="stack-arrow">&#8595;</div>
-  <button class="node-btn" id="btn-process" onclick="selectNode('process')">
-    <div class="node-label">Container Process</div>
-    <div class="node-hint">What's actually running.</div>
-  </button>
-</div>
+  <p class="intro">Namespaces and control groups are the two kernel features doing the actual work of isolation — everything a runtime does builds on these. Click each stage to see it build on the one before it.</p>
 
-  <p class="hint">Click any box to learn more.</p>
+  <div class="illustration" id="illustration" data-stage="kernel">
+    <svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+      <!-- ripple emanating from kernel base -->
+      <ellipse class="ripple" cx="350" cy="215" rx="300" ry="16"></ellipse>
+
+      <!-- kernel base -->
+      <rect class="kernel-base" x="60" y="200" width="580" height="30" rx="6"></rect>
+      <text class="kernel-label" x="350" y="220">Host Kernel</text>
+
+      <!-- stems -->
+      <line class="stem" x1="180" y1="200" x2="180" y2="175"></line>
+      <line class="stem" x1="350" y1="200" x2="350" y2="175"></line>
+      <line class="stem" x1="520" y1="200" x2="520" y2="175"></line>
+
+      <!-- other processes -->
+      <rect class="process-box other" x="140" y="130" width="80" height="48" rx="6"></rect>
+      <text class="process-label other" x="180" y="158">process</text>
+      <rect class="process-box other" x="480" y="130" width="80" height="48" rx="6"></rect>
+      <text class="process-label other" x="520" y="158">process</text>
+
+      <!-- focus process (the one we narrate through) -->
+      <rect class="process-box focus-box focus" x="310" y="125" width="80" height="48" rx="6"></rect>
+      <text class="process-label focus" x="350" y="153">process</text>
+
+      <!-- namespace boundary around focus process -->
+      <rect class="boundary" x="295" y="110" width="110" height="80" rx="10"></rect>
+      <text class="boundary-label" x="350" y="100">namespace boundary</text>
+
+      <!-- cgroup gauge next to focus process -->
+      <rect class="gauge-track" x="430" y="104" width="22" height="70" rx="3"></rect>
+      <rect class="gauge-fill" x="432" y="128" width="18" height="0" style="--fill-h:44px;"></rect>
+      <line class="gauge-ceiling" x1="426" y1="128" x2="458" y2="128"></line>
+      <text class="gauge-label" x="441" y="95">cgroup limit</text>
+    </svg>
+  </div>
+
+  <div class="stage-row">
+    <button class="node-btn active" id="btn-kernel" onclick="selectStage('kernel')">
+      <div class="node-label">Host Kernel</div>
+      <div class="node-hint">The single kernel every container shares.</div>
+    </button>
+    <button class="node-btn" id="btn-ns" onclick="selectStage('ns')">
+      <div class="node-label">Namespaces</div>
+      <div class="node-hint">Isolate what a container can see.</div>
+    </button>
+    <button class="node-btn" id="btn-cgroups" onclick="selectStage('cgroups')">
+      <div class="node-label">Control Groups</div>
+      <div class="node-hint">Limit what a container can use.</div>
+    </button>
+    <button class="node-btn" id="btn-process" onclick="selectStage('process')">
+      <div class="node-label">Container Process</div>
+      <div class="node-hint">What's actually running.</div>
+    </button>
+  </div>
+  <p class="hint">Click any stage to see it animate in the illustration above.</p>
+
   <div class="detail-panel" id="detailPanel">
-    <div class="detail-placeholder">Click a component above to see a fuller explanation.</div>
+    <div class="detail-title">Host Kernel</div>
+    <div class="detail-text">Every container on a host shares that host's single kernel — there's no separate guest kernel the way a virtual machine gets one from a hypervisor. The constant, faint pulse under the illustration represents that shared foundation running underneath every stage, no matter which one you're looking at.</div>
   </div>
 </div>
+
 <script>
-const details = {"kernel": {"title": "Host Kernel", "text": "Every container on a host shares that host's single kernel \u2014 there's no separate guest kernel the way a virtual machine gets one from a hypervisor. This is the core reason containers start faster and use fewer resources than VMs, and it's also the core reason a kernel-level vulnerability is a shared risk: if the kernel is compromised, that exposure isn't contained to one container \u2014 it potentially reaches every container running on that host."}, "ns": {"title": "Namespaces", "text": "Namespaces are the kernel feature that gives a container its own isolated view of the system \u2014 its own process list (so it can't see other containers' processes), its own network interfaces, its own filesystem mounts, and a few other isolated views. Critically, namespace isolation is a configuration choice, not an inherent guarantee: a container can be deliberately launched with a namespace shared with the host (for example, host networking or host PID mode), which removes that particular layer of isolation. That's a setting worth asking about directly rather than assuming is off."}, "cgroups": {"title": "Control Groups (cgroups)", "text": "Control groups, or cgroups, are the kernel feature that caps what a container is allowed to consume \u2014 CPU time, memory, and other resources. Without cgroup limits configured, a single misbehaving or compromised container can consume enough host resources to degrade or crash everything else running on that same host, sometimes called the noisy neighbor problem. On an engagement, an absence of resource limits is often a quieter finding than an access-control gap, but it's a real operational risk worth checking for."}, "process": {"title": "Container Process", "text": "Strip away the terminology and a running container is ultimately just a normal Linux process \u2014 the same kind of process you'd see in any process list \u2014 that happens to have a restricted view of the system (via namespaces) and a capped resource budget (via cgroups). There's no separate virtualized hardware boundary the way there is with a VM. That's the practical meaning behind containers sharing a kernel: the isolation is real, but it's implemented entirely through kernel features acting on an otherwise ordinary process, not through a hardware-level wall."}};
-function selectNode(key) {
-  document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('btn-' + key).classList.add('active');
-  const panel = document.getElementById('detailPanel');
-  const d = details[key];
-  panel.innerHTML = '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
-}
+  const details = {
+    kernel: {
+      title: "Host Kernel",
+      text: "Every container on a host shares that host's single kernel \u2014 there's no separate guest kernel the way a virtual machine gets one from a hypervisor. This is the core reason containers start faster and use fewer resources than VMs, and it's also the core reason a kernel-level vulnerability is a shared risk: if the kernel is compromised, that exposure isn't contained to one container \u2014 it potentially reaches every container running on that host."
+    },
+    ns: {
+      title: "Namespaces",
+      text: "Namespaces are the kernel feature that gives a container its own isolated view of the system \u2014 its own process list, network interfaces, and filesystem mounts. Watch the boundary draw itself around just one process while the others fade: that's the isolation taking effect. Critically, this is a configuration choice, not a guarantee \u2014 a container can be launched with a namespace deliberately shared with the host, which removes that layer of isolation entirely."
+    },
+    cgroups: {
+      title: "Control Groups (cgroups)",
+      text: "Control groups cap what a container is allowed to consume \u2014 CPU time, memory, and other resources. The gauge filling and stopping hard at the ceiling line is exactly that: a resource limit the process cannot exceed, no matter how much it tries to consume. Without cgroup limits configured, a single misbehaving container can consume enough host resources to degrade everything else running on that host \u2014 the \"noisy neighbor\" problem."
+    },
+    process: {
+      title: "Container Process",
+      text: "Strip away the terminology and a running container is ultimately just a normal Linux process \u2014 the same kind of process you'd see in any process list \u2014 that happens to have a restricted view of the system (the boundary) and a capped resource budget (the gauge). The gentle pulse is that process actually executing: isolated and resource-bounded, but otherwise an ordinary process with no separate virtualized hardware boundary the way a VM has."
+    }
+  };
+
+  function selectStage(key) {
+    document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-' + key).classList.add('active');
+    document.getElementById('illustration').setAttribute('data-stage', key);
+    const d = details[key];
+    document.getElementById('detailPanel').innerHTML =
+      '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+  }
 </script>
 </body>
 </html>
