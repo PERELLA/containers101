@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How the Terms Connect</title>
+<style>
+  :root {
+    --bg: #12161C; --panel: #1A2029; --panel-border: #2A323D;
+    --text: #E7EAEE; --text-muted: #9AA5B1;
+    --gold: #C9A227; --gold-soft: #8A6D1E;
+    --pass: #4CAF7D; --caution: #E0A952; --finding: #E0625A;
+    --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; background: transparent; color: var(--text); font-family: var(--sans); line-height:1.5; }
+  .wrap { max-width: 980px; margin: 0 auto; background: var(--bg); padding: 24px 20px 28px; border-radius: 8px; }
+  h1 { font-size: 22px; margin: 0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+  .intro { color: var(--text-muted); font-size: 14.5px; max-width: 700px; margin-bottom: 18px; }
+  h2.section-label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--gold); margin: 22px 0 10px; font-weight: 700; }
+
+  .illustration {
+    background: #0D1117;
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 20px 10px 10px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .illustration svg { width: 100%; height: auto; display:block; }
+
+  .node-box { fill: var(--panel); stroke: var(--panel-border); stroke-width: 1.5; transition: filter .3s ease; }
+  .node-box.checkpoint { stroke: var(--gold-soft); stroke-dasharray: 5 4; }
+  .node-label { fill: var(--text); font-size: 13px; font-weight: 700; font-family: var(--sans); text-anchor: middle; }
+  .node-label.checkpoint { fill: var(--gold); }
+  .node-sub { fill: var(--text-muted); font-size: 10.5px; font-family: var(--sans); text-anchor: middle; }
+  .connector { fill: none; stroke: #2F3B4A; stroke-width: 2; }
+  .pulse { fill: var(--gold); r: 4.5; }
+
+  .flow-btn { cursor: pointer; }
+  .flow-btn:hover .node-box { stroke: var(--gold-soft); }
+  .flow-btn.active .node-box { stroke: var(--gold); filter: drop-shadow(0 0 4px rgba(201,162,39,0.4)); }
+
+  /* ---- scale panel ---- */
+  .scale-panel {
+    background: #0D1117; border: 1px solid var(--panel-border); border-radius: 8px;
+    padding: 16px 16px 14px; margin-top: 4px;
+  }
+  .scale-note {
+    font-size: 12.5px; color: var(--text-muted); text-align:center; margin-top: 10px;
+  }
+  .scale-note strong { color: var(--gold); font-weight: 700; }
+  .scale-toggle-row { display:flex; justify-content:center; margin-top: 8px; }
+  .scale-toggle-btn {
+    font-family: var(--sans); cursor: pointer; font-size: 13px; font-weight: 600;
+    background: var(--panel); border: 1px solid var(--gold-soft); color: var(--gold);
+    border-radius: 20px; padding: 8px 18px; transition: background .2s ease;
+  }
+  .scale-toggle-btn:hover { background: rgba(201,162,39,0.12); }
+
+  .host-box { transition: opacity .6s ease; }
+  .host-box.idle { opacity: 0.35; }
+  .host-connector { transition: opacity .6s ease; }
+  .host-connector.idle { opacity: 0.2; }
+  .idle-tag { fill: var(--finding); font-size: 9.5px; font-weight: 700; text-anchor: middle; opacity: 0; transition: opacity .6s ease; font-family: var(--sans); }
+  .idle-tag.show { opacity: 1; }
+
+  .hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align:center; }
+  .detail-panel {
+    margin-top: 18px; padding: 18px 20px; border-radius: 8px;
+    background: rgba(201,162,39,0.06); border: 1px solid var(--gold-soft); min-height: 90px;
+  }
+  .detail-title { font-weight: 700; font-size: 15px; color: var(--gold); margin-bottom: 8px; }
+  .detail-text { font-size: 14px; color: var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>How the Terms Connect</h1>
+  <p class="intro">The glossary defines each term on its own — this shows how they actually fit together, from a base image to a running container, with the scanning checkpoint covered in the next lesson.</p>
+
+  <div class="illustration">
+    <svg viewBox="0 0 820 150" xmlns="http://www.w3.org/2000/svg">
+      <path class="connector" d="M 120,75 L 155,75"></path>
+      <path class="connector" d="M 245,75 L 280,75"></path>
+      <path class="connector" d="M 370,75 L 400,75"></path>
+      <path class="connector" d="M 490,75 L 525,75"></path>
+      <path class="connector" d="M 615,75 L 650,75"></path>
+
+      <circle class="pulse">
+        <animateMotion dur="4.8s" repeatCount="indefinite" path="M 20,75 L 120,75 L 155,75 L 245,75 L 280,75 L 370,75 L 400,75 L 490,75 L 525,75 L 615,75 L 650,75 L 790,75" calcMode="linear"></animateMotion>
+      </circle>
+
+      <g class="flow-btn" id="btn-base" onclick="selectNode('base')">
+        <rect class="node-box" x="10" y="45" width="110" height="60" rx="8"></rect>
+        <text class="node-label" x="65" y="72">Base Image</text>
+        <text class="node-sub" x="65" y="90">Starting layer</text>
+      </g>
+
+      <g class="flow-btn" id="btn-layer" onclick="selectNode('layer')">
+        <rect class="node-box" x="155" y="45" width="90" height="60" rx="8"></rect>
+        <text class="node-label" x="200" y="72">+ Layers</text>
+        <text class="node-sub" x="200" y="90">Stacked on top</text>
+      </g>
+
+      <g class="flow-btn" id="btn-image" onclick="selectNode('image')">
+        <rect class="node-box" x="280" y="45" width="90" height="60" rx="8"></rect>
+        <text class="node-label" x="325" y="72">= Image</text>
+        <text class="node-sub" x="325" y="90">Read-only template</text>
+      </g>
+
+      <g class="flow-btn" id="btn-scan" onclick="selectNode('scan')">
+        <rect class="node-box checkpoint" x="400" y="45" width="90" height="60" rx="8"></rect>
+        <text class="node-label checkpoint" x="445" y="68">Scan</text>
+        <text class="node-sub" x="445" y="84">Checkpoint</text>
+        <text class="node-sub" x="445" y="97">(shift-left)</text>
+      </g>
+
+      <g class="flow-btn" id="btn-registry" onclick="selectNode('registry')">
+        <rect class="node-box" x="525" y="45" width="90" height="60" rx="8"></rect>
+        <text class="node-label" x="570" y="72">Registry</text>
+        <text class="node-sub" x="570" y="90">Stored &amp; pulled from</text>
+      </g>
+
+      <g class="flow-btn" id="btn-container" onclick="selectNode('container')">
+        <rect class="node-box" x="650" y="45" width="100" height="60" rx="8"></rect>
+        <text class="node-label" x="700" y="72">Container</text>
+        <text class="node-sub" x="700" y="90">Running instance</text>
+      </g>
+    </svg>
+  </div>
+  <p class="hint">Click any box to see how it fits in the chain.</p>
+
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">The Chain</div>
+    <div class="detail-text">A base image is built up with layers to form a complete image. Before it ever reaches a registry, scanning tools get a chance to catch known vulnerabilities — the earlier this happens, the simpler the fix. The image then gets pushed to a registry for storage and distribution, pulled back down, and run as one or more containers. Click any box above for that term's definition in this context.</div>
+  </div>
+
+  <h2 class="section-label">At Scale</h2>
+  <div class="scale-panel">
+    <svg viewBox="0 0 700 150" xmlns="http://www.w3.org/2000/svg">
+      <rect x="290" y="10" width="120" height="44" rx="22" fill="#1A2029" stroke="#8A6D1E" stroke-width="2"></rect>
+      <text x="350" y="37" fill="#C9A227" font-size="14" font-weight="700" text-anchor="middle" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">Orchestrator</text>
+
+      <path id="conn-a" class="host-connector" d="M 350,54 L 150,95" stroke="#2F3B4A" stroke-width="2" fill="none"></path>
+      <path id="conn-b" class="host-connector" d="M 350,54 L 350,95" stroke="#2F3B4A" stroke-width="2" fill="none"></path>
+      <path id="conn-c" class="host-connector" d="M 350,54 L 550,95" stroke="#2F3B4A" stroke-width="2" fill="none"></path>
+
+      <g id="host-a" class="host-box">
+        <rect x="60" y="95" width="180" height="45" rx="8" fill="#1A2029" stroke="#2A323D" stroke-width="1.5"></rect>
+        <text x="150" y="113" fill="#E7EAEE" font-size="12" font-weight="700" text-anchor="middle" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">Host A</text>
+        <text id="host-a-containers" x="150" y="130" fill="#9AA5B1" font-size="10.5" text-anchor="middle" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">container · container</text>
+      </g>
+
+      <g id="host-b" class="host-box">
+        <rect x="260" y="95" width="180" height="45" rx="8" fill="#1A2029" stroke="#2A323D" stroke-width="1.5"></rect>
+        <text x="350" y="113" fill="#E7EAEE" font-size="12" font-weight="700" text-anchor="middle" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">Host B</text>
+        <text id="host-b-containers" x="350" y="130" fill="#9AA5B1" font-size="10.5" text-anchor="middle" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">container</text>
+      </g>
+
+      <g id="host-c" class="host-box">
+        <rect x="460" y="95" width="180" height="45" rx="8" fill="#1A2029" stroke="#2A323D" stroke-width="1.5"></rect>
+        <text x="550" y="113" fill="#E7EAEE" font-size="12" font-weight="700" text-anchor="middle" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">Host C</text>
+        <text id="host-c-containers" x="550" y="130" fill="#9AA5B1" font-size="10.5" text-anchor="middle" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">container · container</text>
+      </g>
+    </svg>
+    <p class="scale-note">In production, an <strong>orchestrator</strong> decides which host runs which container, and restarts or redistributes them as needed. Kubernetes is the dominant platform for this today — <strong>covered in full in Kubernetes Fundamentals.</strong></p>
+    <div class="scale-toggle-row">
+      <button class="scale-toggle-btn" id="scaleToggleBtn" onclick="toggleScale()">Simulate: demand drops</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const details = {
+  "base": {"title": "Base Image", "text": "Every image starts here \u2014 a minimal operating system or language runtime that everything else gets built on top of. Its security posture carries forward into every image built from it, which is why the choice of base image matters."},
+  "layer": {"title": "Layers", "text": "Each build instruction \u2014 installing a package, copying in code, setting a config value \u2014 adds one layer on top of the base image. Layers are cached and reused, which is why small changes rebuild quickly."},
+  "image": {"title": "Image", "text": "Once all the layers are stacked, the result is a complete, read-only image \u2014 the packaged template a container will eventually be built from. It doesn't run anything yet; it's just the blueprint."},
+  "scan": {"title": "Scan (Checkpoint)", "text": "Before an image moves on, scanning tools check its contents against databases of known vulnerabilities. This is the \u201cshift-left\u201d principle in action: the earlier a problem is caught in this chain, the cheaper and simpler it is to fix. Covered in full in Registry and Image Scanning Concepts, along with the specific tools \u2014 Trivy, Clair, and Snyk \u2014 that do this work."},
+  "registry": {"title": "Registry", "text": "The image gets pushed to a registry for storage and distribution \u2014 a library that other machines pull the same image from, whether that's a build server, a test environment, or production."},
+  "container": {"title": "Container", "text": "When something actually needs to run the image, it's pulled from the registry and started as a container \u2014 a running instance, isolated from everything else, that can be started and stopped many times from that same image."}
+};
+
+function selectNode(key) {
+  document.querySelectorAll('.flow-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + key).classList.add('active');
+  const d = details[key];
+  document.getElementById('detailPanel').innerHTML =
+    '<div class="detail-title">' + d.title + '</div><div class="detail-text">' + d.text + '</div>';
+}
+
+let scaledDown = false;
+function toggleScale() {
+  scaledDown = !scaledDown;
+  const btn = document.getElementById('scaleToggleBtn');
+  const hostB = document.getElementById('host-b');
+  const hostC = document.getElementById('host-c');
+  const connB = document.getElementById('conn-b');
+  const connC = document.getElementById('conn-c');
+  const aText = document.getElementById('host-a-containers');
+  const bText = document.getElementById('host-b-containers');
+  const cText = document.getElementById('host-c-containers');
+
+  if (scaledDown) {
+    hostB.classList.add('idle');
+    hostC.classList.add('idle');
+    connB.classList.add('idle');
+    connC.classList.add('idle');
+    aText.textContent = 'container';
+    bText.textContent = 'idle \u2014 no containers scheduled';
+    cText.textContent = 'idle \u2014 no containers scheduled';
+    btn.textContent = 'Simulate: demand returns';
+  } else {
+    hostB.classList.remove('idle');
+    hostC.classList.remove('idle');
+    connB.classList.remove('idle');
+    connC.classList.remove('idle');
+    aText.textContent = 'container · container';
+    bText.textContent = 'container';
+    cText.textContent = 'container · container';
+    btn.textContent = 'Simulate: demand drops';
+  }
+}
+</script>
+</body>
+</html>
